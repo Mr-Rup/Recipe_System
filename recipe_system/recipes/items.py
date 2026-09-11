@@ -5,29 +5,7 @@ Core recipe structures used by the recipe system.
 from typing import Optional
 from pydantic import BaseModel, Field
 from recipe_system.ingredients.items import Ingredient
-
-class RecipeSource(BaseModel):
-    """
-    Represents the original source from which a recipe was obtained.
-
-    The source information is preserved so that extracted and normalized recipe data can always be traced back to the original material.
-    """
-
-    source_type: str = Field(
-        ...,
-        description="Type of source from which the recipe was obtained."
-    )
-
-    original_file: Optional[str] = Field(
-        default=None,
-        description="Path or identifier of the original recipe file."
-    )
-
-    extracted_text: Optional[str] = Field(
-        default=None,
-        description="Raw text extracted from the original recipe source."
-    )
-
+from recipe_system.ingestion.metadata import RecipeSource
 
 class CookingStep(BaseModel):
     """
