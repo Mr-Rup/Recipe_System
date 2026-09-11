@@ -2,3 +2,9 @@
 
 __pycache__/
 .venv
+
+storage/raw/*
+storage/processed/*
+
+!storage/raw/.gitkeep
+!storage/processed/.gitkeep
