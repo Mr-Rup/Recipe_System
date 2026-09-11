@@ -28,6 +28,10 @@ def test_image_source_is_ingested(tmp_path: Path):
     assert Path(source.original_file).exists()
     assert source.original_filename == "recipe.png"
 
+    assert source.content_hash is not None
+    assert len(source.content_hash) == 64
+    int(source.content_hash, 16)
+
 def test_pdf_source_is_ingested(tmp_path: Path):
     """Verify that a PDF source is validated, stored, and represented by source metadata."""
 
@@ -51,6 +55,10 @@ def test_pdf_source_is_ingested(tmp_path: Path):
     assert Path(source.original_file).exists()
     assert source.original_filename == "recipe.pdf"
 
+    assert source.content_hash is not None
+    assert len(source.content_hash) == 64
+    int(source.content_hash, 16)
+
 def test_text_source_is_ingested(tmp_path: Path):
     """Verify that a text source is validated, stored, and represented by source metadata."""
 
@@ -69,3 +77,7 @@ def test_text_source_is_ingested(tmp_path: Path):
     assert source.original_file is not None
     assert Path(source.original_file).exists()
     assert source.original_filename == "recipe.txt"
+    
+    assert source.content_hash is not None
+    assert len(source.content_hash) == 64
+    int(source.content_hash, 16)

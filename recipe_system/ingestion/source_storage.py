@@ -4,9 +4,9 @@ Utilities for storing and optimizing recipe source files in the local recipe sys
 The source storage layer manages physical recipe files independently from recipe metadata and structured recipe information.
 """
 
+import hashlib
 from pathlib import Path
 from shutil import copy2
-from uuid import uuid4
 
 from recipe_system.ingestion.source_optimizer import ImageOptimizer, PDFOptimizer
 
@@ -70,7 +70,9 @@ class SourceStorage:
         source_path = Path(source_file)
 
         if not source_path.is_file():
-            raise FileNotFoundError(f"Source file not found: {source_path}")
+            raise FileNotFoundError(
+                f"Source file not found: {source_path}"
+            )
 
         extension = source_path.suffix.lower()
 
@@ -79,8 +81,18 @@ class SourceStorage:
                 f"Unsupported source format: {source_path.suffix}"
             )
 
-        stored_filename = f"{uuid4()}_{source_path.name}"
-        destination = self.storage_directory / stored_filename
+        content_hash = self.calculate_hash(source_path)
+
+        existing_files = list(
+            self.storage_directory.glob(f"{content_hash}.*")
+        )
+
+        if existing_files:
+            return existing_files[0]
+
+        destination = self.storage_directory / (
+            f"{content_hash}{extension}"
+        )
 
         if extension in self.IMAGE_EXTENSIONS:
             self.image_optimizer.optimize(
@@ -98,3 +110,26 @@ class SourceStorage:
             copy2(source_path, destination)
 
         return destination
+
+    @staticmethod
+    def calculate_hash(source_file: Path) -> str:
+        """
+        Calculate the SHA-256 hash of a source file.
+
+        Args:
+            source_file: Path to the source file.
+
+        Returns:
+            SHA-256 hexadecimal digest of the file content.
+        """
+
+        hasher = hashlib.sha256()
+
+        with source_file.open("rb") as file:
+            for chunk in iter(
+                lambda: file.read(1024 * 1024),
+                b"",
+            ):
+                hasher.update(chunk)
+
+        return hasher.hexdigest()

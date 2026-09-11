@@ -42,3 +42,8 @@ class RecipeSource(BaseModel):
         default=None,
         description="Raw text extracted from the original source before AI structuring."
     )
+
+    content_hash: Optional[str] = Field(
+        default=None,
+        description="SHA-256 hash of the source file content used to identify exact duplicate sources."
+    )

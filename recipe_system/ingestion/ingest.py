@@ -51,12 +51,14 @@ class SourceIngester:
         """
 
         source_path = self.selector.validate(source_file)
+        content_hash = self.storage.calculate_hash(source_path)
         stored_file = self.storage.store(source_path)
 
         return RecipeSource(
             source_type=self._get_source_type(source_path),
             original_file=str(stored_file),
             original_filename=source_path.name,
+            content_hash=content_hash,
         )
 
     @staticmethod

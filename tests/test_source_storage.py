@@ -87,3 +87,70 @@ def test_unsupported_source_format_raises_error(tmp_path: Path):
 
     with pytest.raises(ValueError):
         storage.store(source_file)
+
+def test_same_source_is_not_stored_twice(tmp_path: Path):
+    """Verify that storing the same source twice returns the same stored file."""
+
+    source_file = tmp_path / "recipe.txt"
+    source_file.write_text(
+        "500 g chicken.",
+        encoding="utf-8",
+    )
+
+    storage = SourceStorage(tmp_path / "storage" / "raw")
+
+    first_stored_file = storage.store(source_file)
+    second_stored_file = storage.store(source_file)
+
+    assert first_stored_file == second_stored_file
+    assert len(list(storage.storage_directory.iterdir())) == 1
+
+
+def test_same_content_with_different_filename_is_not_duplicated(tmp_path: Path):
+    """Verify that identical source content is stored only once regardless of filename."""
+
+    first_source = tmp_path / "recipe_a.txt"
+    second_source = tmp_path / "recipe_b.txt"
+
+    first_source.write_text(
+        "500 g chicken.",
+        encoding="utf-8",
+    )
+
+    second_source.write_text(
+        "500 g chicken.",
+        encoding="utf-8",
+    )
+
+    storage = SourceStorage(tmp_path / "storage" / "raw")
+
+    first_stored_file = storage.store(first_source)
+    second_stored_file = storage.store(second_source)
+
+    assert first_stored_file == second_stored_file
+    assert len(list(storage.storage_directory.iterdir())) == 1
+
+
+def test_different_content_is_stored_separately(tmp_path: Path):
+    """Verify that sources with different content receive different stored files."""
+
+    first_source = tmp_path / "recipe_a.txt"
+    second_source = tmp_path / "recipe_b.txt"
+
+    first_source.write_text(
+        "500 g chicken.",
+        encoding="utf-8",
+    )
+
+    second_source.write_text(
+        "500 g chicken and 200 ml coconut milk.",
+        encoding="utf-8",
+    )
+
+    storage = SourceStorage(tmp_path / "storage" / "raw")
+
+    first_stored_file = storage.store(first_source)
+    second_stored_file = storage.store(second_source)
+
+    assert first_stored_file != second_stored_file
+    assert len(list(storage.storage_directory.iterdir())) == 2
