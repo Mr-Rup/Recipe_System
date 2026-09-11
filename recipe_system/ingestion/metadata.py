@@ -4,6 +4,7 @@ Data structures representing raw recipe sources submitted to the recipe system.
 
 from enum import Enum
 from typing import Optional
+
 from pydantic import BaseModel, Field
 
 class SourceType(str, Enum):
@@ -14,7 +15,6 @@ class SourceType(str, Enum):
     IMAGE = "image"
     PDF = "pdf"
     TEXT = "text"
-
 
 class RecipeSource(BaseModel):
     """
@@ -30,7 +30,12 @@ class RecipeSource(BaseModel):
 
     original_file: Optional[str] = Field(
         default=None,
-        description="Path to the original source file stored by the system."
+        description="Path to the stored source file managed by the recipe system."
+    )
+
+    original_filename: Optional[str] = Field(
+        default=None,
+        description="Filename originally supplied by the user before source storage."
     )
 
     extracted_text: Optional[str] = Field(
