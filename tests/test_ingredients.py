@@ -1,12 +1,16 @@
 """
-Tests for ingredient domain models.
+Tests for ingredient domain objects.
 """
 
 from recipe_system.ingredients.enums import (
     IngredientCategory,
     IngredientRole,
 )
-from recipe_system.ingredients.items import *
+from recipe_system.ingredients.items import (
+    Ingredient,
+    MasterIngredient,
+)
+from recipe_system.ingredients.measurements import IngredientMeasurement
 
 
 def test_ingredient():
@@ -14,17 +18,22 @@ def test_ingredient():
 
     ingredient = Ingredient(
         name="dhania",
-        quantity=2,
-        unit="tbsp",
-        original_text="2 tbsp dhania",
+        measurement=IngredientMeasurement(
+            value=500,
+            unit="g",
+            original_text="500 g",
+        ),
+        original_text="500 g dhania",
         category=IngredientCategory.AROMATIC,
         role=IngredientRole.ESSENTIAL,
     )
 
     assert ingredient.name == "dhania"
-    assert ingredient.quantity == 2
-    assert ingredient.unit == "tbsp"
+    assert ingredient.measurement.value == 500
+    assert ingredient.measurement.unit == "g"
+    assert ingredient.measurement.original_text == "500 g"
     assert ingredient.master_ingredient_id is None
+
 
 def test_master_ingredient():
     """Verify that a recipe ingredient can reference its canonical master ingredient."""
@@ -42,12 +51,18 @@ def test_master_ingredient():
     ingredient = Ingredient(
         name="dhania",
         master_ingredient_id=coriander.id,
-        quantity=2,
-        unit="tbsp",
-        original_text="2 tbsp dhania",
+        measurement=IngredientMeasurement(
+            value=500,
+            unit="g",
+            original_text="500 g",
+        ),
+        original_text="500 g dhania",
         category=IngredientCategory.AROMATIC,
         role=IngredientRole.ESSENTIAL,
     )
 
     assert ingredient.master_ingredient_id == coriander.id
     assert coriander.canonical_name == "coriander"
+    assert ingredient.measurement.value == 500
+    assert ingredient.measurement.unit == "g"
+    assert ingredient.measurement.original_text == "500 g"

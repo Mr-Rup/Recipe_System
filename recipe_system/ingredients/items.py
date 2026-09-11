@@ -8,6 +8,7 @@ from recipe_system.ingredients.enums import (
     IngredientCategory,
     IngredientRole,
 )
+from recipe_system.ingredients.measurements import IngredientMeasurement
 from uuid import UUID, uuid4
 
 class Ingredient(BaseModel):
@@ -37,14 +38,9 @@ class Ingredient(BaseModel):
         description="Identifier of the canonical master ingredient associated with this recipe ingredient."
     )
 
-    quantity: Optional[float] = Field(
+    measurement: Optional[IngredientMeasurement] = Field(
         default=None,
-        description="Numeric quantity of the ingredient, when available."
-    )
-
-    unit: Optional[str] = Field(
-        default=None,
-        description="Unit associated with the ingredient quantity."
+        description="Quantity and measurement information associated with the ingredient."
     )
 
     original_text: Optional[str] = Field(
@@ -55,11 +51,6 @@ class Ingredient(BaseModel):
     preparation: Optional[str] = Field(
         default=None,
         description="Preparation or processing instruction for the ingredient."
-    )
-
-    quantity_note: Optional[str] = Field(
-        default=None,
-        description="Non-numeric quantity information such as 'to taste'."
     )
 
     category: IngredientCategory = Field(
