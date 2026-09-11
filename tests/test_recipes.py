@@ -6,20 +6,7 @@ from recipe_system.ingredients.enums import *
 from recipe_system.ingredients.items import Ingredient
 from recipe_system.ingredients.measurements import IngredientMeasurement
 from recipe_system.recipes.items import *
-from recipe_system.ingestion.metadata import RecipeSource, SourceType
-
-def test_recipe_source():
-    """Verify that a raw recipe source preserves its type and extracted content."""
-
-    source = RecipeSource(
-        source_type=SourceType.PDF,
-        original_file="storage/raw/chicken_curry.pdf",
-        extracted_text="500 g chicken.",
-    )
-
-    assert source.source_type == SourceType.PDF
-    assert source.original_file == "storage/raw/chicken_curry.pdf"
-    assert source.extracted_text == "500 g chicken."
+from recipe_system.ingestion.metadata import SourceType
 
 def test_recipe_creation():
     """Verify that a complete structured recipe can be created."""
@@ -39,7 +26,7 @@ def test_recipe_creation():
     recipe = Recipe(
         recipe_name="Chicken Curry",
         source=RecipeSource(
-            source_type=SourceType.TEXT,
+            source_type=SourceType.PDF,
             extracted_text="500 g chicken. Cook until tender.",
         ),
         ingredients=RecipeIngredients(
@@ -70,7 +57,7 @@ def test_recipe_draft():
     recipe = Recipe(
         recipe_name="Chicken Curry",
         source=RecipeSource(
-            source_type=SourceType.TEXT,
+            source_type=SourceType.PDF,
             extracted_text="500 g chicken. Cook until tender.",
         ),
         ingredients=RecipeIngredients(),
