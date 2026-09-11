@@ -1,5 +1,5 @@
 """
-Utilities for storing recipe source files in the local recipe system.
+Utilities for storing and optimizing recipe source files in the local recipe system.
 
 The source storage layer manages physical recipe files independently from recipe metadata and structured recipe information.
 """
@@ -8,7 +8,9 @@ from pathlib import Path
 from shutil import copy2
 from uuid import uuid4
 
-class RecipeSourceStorage:
+from recipe_system.ingestion.source_optimizer import ImageOptimizer, PDFOptimizer
+
+class SourceStorage:
     """
     Manages persistent storage of recipe source files.
 
@@ -24,7 +26,17 @@ class RecipeSourceStorage:
         ".txt",
     }
 
-    def __init__(self, storage_directory: str | Path = "storage/raw") -> None:
+    IMAGE_EXTENSIONS = {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp",
+    }
+
+    def __init__(
+        self,
+        storage_directory: str | Path = "storage/raw",
+    ) -> None:
         """
         Initialize the recipe source storage manager.
 
@@ -35,17 +47,20 @@ class RecipeSourceStorage:
         self.storage_directory = Path(storage_directory)
         self.storage_directory.mkdir(parents=True, exist_ok=True)
 
+        self.image_optimizer = ImageOptimizer()
+        self.pdf_optimizer = PDFOptimizer()
+
     def store(self, source_file: str | Path) -> Path:
         """
-        Copy a local recipe source file into the recipe system's source storage.
+        Store a recipe source file using the appropriate optimization process.
 
-        A unique identifier is added to the stored filename to prevent collisions between files with identical names.
+        Image and PDF sources are optimized before being stored, while text sources are copied directly without modification.
 
         Args:
             source_file: Path to the local source file selected by the user.
 
         Returns:
-            Path to the stored source file.
+            Path to the final stored source file.
 
         Raises:
             FileNotFoundError: If the supplied source file does not exist.
@@ -57,7 +72,9 @@ class RecipeSourceStorage:
         if not source_path.is_file():
             raise FileNotFoundError(f"Source file not found: {source_path}")
 
-        if source_path.suffix.lower() not in self.SUPPORTED_EXTENSIONS:
+        extension = source_path.suffix.lower()
+
+        if extension not in self.SUPPORTED_EXTENSIONS:
             raise ValueError(
                 f"Unsupported source format: {source_path.suffix}"
             )
@@ -65,6 +82,19 @@ class RecipeSourceStorage:
         stored_filename = f"{uuid4()}_{source_path.name}"
         destination = self.storage_directory / stored_filename
 
-        copy2(source_path, destination)
+        if extension in self.IMAGE_EXTENSIONS:
+            self.image_optimizer.optimize(
+                source_path,
+                destination,
+            )
+
+        elif extension == ".pdf":
+            self.pdf_optimizer.optimize(
+                source_path,
+                destination,
+            )
+
+        else:
+            copy2(source_path, destination)
 
         return destination
